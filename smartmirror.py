@@ -26,10 +26,11 @@ weather_lang = 'en' # see https://darksky.net/dev/docs/forecast for full list of
 weather_unit = 'us' # see https://darksky.net/dev/docs/forecast for full list of unit parameters values
 latitude = None # Set this if IP location lookup does not work for you (must be a string)
 longitude = None # Set this if IP location lookup does not work for you (must be a string)
-xlarge_text_size = 94
+xlarge_text_size = 96
 large_text_size = 48
 medium_text_size = 28
 small_text_size = 18
+xsmall_text_Size = 12
 
 @contextmanager
 def setlocale(name): #thread proof function to work with locale
@@ -247,7 +248,7 @@ class NewsHeadline(Frame):
         Frame.__init__(self, parent, bg='black')
 
         image = Image.open("assets/Newspaper.png")
-        image = image.resize((25, 25), Image.ANTIALIAS)
+        image = image.resize((20, 20), Image.ANTIALIAS)
         image = image.convert('RGB')
         photo = ImageTk.PhotoImage(image)
 
@@ -256,7 +257,7 @@ class NewsHeadline(Frame):
         self.iconLbl.pack(side=LEFT, anchor=N)
 
         self.eventName = event_name
-        self.eventNameLbl = Label(self, text=self.eventName, font=('Helvetica', small_text_size), fg="white", bg="black")
+        self.eventNameLbl = Label(self, text=self.eventName, font=('Helvetica', xsmall_text_Size), fg="white", bg="black")
         self.eventNameLbl.pack(side=LEFT, anchor=N)
 
 
