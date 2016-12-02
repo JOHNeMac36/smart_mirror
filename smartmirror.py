@@ -306,13 +306,13 @@ class FullscreenWindow:
         self.tk.bind("<Escape>", self.end_fullscreen)
         # clock
         self.clock = Clock(self.topFrame)
-        self.clock.pack(side=RIGHT, anchor=N, padx=15, pady=15)
+        self.clock.pack(side=RIGHT, anchor=N, padx=15, pady=25)
         # weather
         self.weather = Weather(self.topFrame)
-        self.weather.pack(side=LEFT, anchor=N ,padx=15, pady=15)
+        self.weather.pack(side=LEFT, anchor=N ,padx=15, pady=25)
         # news
         self.news = News(self.bottomFrame)
-        self.news.pack(side=LEFT, anchor=S)
+        self.news.pack(side=LEFT, anchor=S, pady=25)
         # calender - removing for now
         # self.calender = Calendar(self.bottomFrame)
         # self.calender.pack(side = RIGHT, anchor=S, padx=100, pady=60)
