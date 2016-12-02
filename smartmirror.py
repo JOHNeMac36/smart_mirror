@@ -16,7 +16,7 @@ from contextlib import contextmanager
 
 LOCALE_LOCK = threading.Lock()
 
-ip = '150.250.125.56>'
+ip = '152.250.125.56'
 ui_locale = '' # e.g. 'fr_FR' fro French, '' as default
 time_format = 12 # 12 or 24
 date_format = "%b %d, %Y" # check python doc for strftime() for options
@@ -305,13 +305,13 @@ class FullscreenWindow:
         self.tk.bind("<Escape>", self.end_fullscreen)
         # clock
         self.clock = Clock(self.topFrame)
-        self.clock.pack(side=RIGHT, anchor=N, padx=100, pady=60)
+        self.clock.pack(side=RIGHT, anchor=N)
         # weather
         self.weather = Weather(self.topFrame)
-        self.weather.pack(side=LEFT, anchor=N, padx=100, pady=60)
+        self.weather.pack(side=LEFT, anchor=N)
         # news
         self.news = News(self.bottomFrame)
-        self.news.pack(side=LEFT, anchor=S, padx=100, pady=60)
+        self.news.pack(side=LEFT, anchor=S)
         # calender - removing for now
         # self.calender = Calendar(self.bottomFrame)
         # self.calender.pack(side = RIGHT, anchor=S, padx=100, pady=60)
