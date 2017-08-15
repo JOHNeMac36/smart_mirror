@@ -89,3 +89,6 @@ ENV/
 .ropeproject
 
 *.jpeg
+*.jpg
+*.png
+emotion-detection
