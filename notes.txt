@@ -1,0 +1,7 @@
+
+
+
+
+02-27-2017: internet troubleshooting found that common reason for internet troubles is in network/interfaces, wlan0 gateway should
+		be static and have corresponding gateway address to one found in route -n with data packets.
+
