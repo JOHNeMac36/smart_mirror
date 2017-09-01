@@ -36,12 +36,12 @@ def exit_handler():
 
 LOCALE_LOCK = threading.Lock()
 
-ip = '150.250.125.232'
+ip = 'Inster ip address here'
 ui_locale = '' # e.g. 'fr_FR' fro French, '' as default
 time_format = 12 # 12 or 24
 date_format = "%b %d, %Y" # check python doc for strftime() for options
 news_country_code = 'us'
-weather_api_token = '83afd8c71153c1996fb93ff670b33366' # create account at https://darksky.net/dev/
+weather_api_token = 'Insert api key here' # create account at https://darksky.net/dev/
 weather_lang = 'en' # see https://darksky.net/dev/docs/forecast for full list of language parameters values
 weather_unit = 'us' # see https://darksky.net/dev/docs/forecast for full list of unit parameters values
 latitude = None # Set this if IP location lookup does not work for you (must be a string)
@@ -280,65 +280,72 @@ class NewsHeadline(Frame):
 class FacialRec(Frame):
     def __init__(self, parent, *args, **kwargs):
         Frame.__init__(self, parent, *args, **kwargs)
-        self.config(bg='black')        
-        self.e2fRatio_min = 0.2142
-        self.e2fRatio_max = 0.5
-        self.f2pRatio_min = 0.1
-        self.f2pRatio_max = 1.0
-        self.f2mRatio_min = 0.245
-        self.f2sRatio_min = 0.245
-        self.isRecognizedFace = False
-        self.emotionThreshold = 5
-        self.maxSmileCountdown = 3
-        self.smileCountdown = 0
+        self.config(bg='black')
         
+        # facial recognition constants derived from testing. you may need to tweak these values for your own mirror     
+        self.e2fRatio_min = 0.2142 # eye to face ratio minimum
+        self.e2fRatio_max = 0.5    # eye to face ratio maximum
+        self.f2pRatio_min = 0.1    # face to total image size ratio minimum
+        self.f2pRatio_max = 1.0    # face to total image size ratio maximum
+        self.f2mRatio_min = 0.245  # face to mouth ratio minimum
+        self.f2sRatio_min = 0.245  # face to mouth ratio maximum
+        self.isRecognizedFace = False
+        
+        # emotion detection coming soon
+        #self.emotionThreshold = 5
+        #self.maxSmileCountdown = 3
+        #self.smileCountdown = 0
+        
+        # haar cascades are algorithms to identify certain objects in an image
         self.face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
         self.eye_cascade = cv2.CascadeClassifier('haarcascade_eye.xml')
         self.mouth_cascade = cv2.CascadeClassifier('mouth.xml')
         self.smile_cascade = cv2.CascadeClassifier('haarcascade_smile.xml')
         
+        # initilize pi cam
         self.camera = PiCamera()
+        
+        # resolution is optimized to be high enough to differentiate facial structures
+        # but low enough to be easily processed
         self.camera.resolution = (128,160)
+        
+        # setting up a facial recognition frame
         self.faceLbl = Label(self)
         self.facialRecognition()
         self.faceLbl.config(image=self.imgtk)
         self.faceLbl.pack()        
     
     def facePic(self):
-        rawCapture = PiRGBArray(self.camera)
-        #time.sleep(0.3)
-        self.camera.capture(rawCapture, format="bgr")
-        img = rawCapture.array
-        #img = cv2.resize(img, (240, 320))
-        # Rearrang the color channel
-        b,g,r = cv2.split(img)
-        img = cv2.merge((r,g,b))
+        ### Takes picture using pi cam and returns the image data in the form of an array
+        
+        rawCapture = PiRGBArray(self.camera) # takes a picture using the pi cam stores raw image
+        self.camera.capture(rawCapture, format="bgr") # converts raw data values to bgr (blue, green, red) array
+        img = rawCapture.array # stores the array of bgr values
+        img = cv2.merge((r,g,b)) # merges the b,g,and r channels into one channel array
 
         # Convert the Image object into a TkPhoto object
         img = Image.fromarray(img)
         img = ImageTk.PhotoImage(image=img)
-        print "facePic() ran"
+        print "facePic() ran" # for debuging purposes to see if funtion works properly
         return img
 
     def facialRecognition(self):
         rawCapture = PiRGBArray(self.camera)
-
-        # allow the camera to warmup
-        #time.sleep(0.3)
-
-        self.camera.capture(rawCapture, format="bgr")
-
+        
         img = rawCapture.array
-        #img = cv2.resize(img, (120, 160))
+        
+        # converts the rawCapture to a grayscale cv2 image
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
         # find face 
-        pheight, pwidth, pchannels = img.shape
+        pheight, pwidth, pchannels = img.shape # stores picture height, width, and channels to seperate variables
+        
+        # uses haarcascade function to detect facial paterns in image and store the face locations in 'faces'
         faces = self.face_cascade.detectMultiScale(gray, scaleFactor=1.2, minNeighbors=1, minSize=(int(pheight * self.f2pRatio_min), int(pwidth * self.f2pRatio_min)),maxSize=(int(pheight * self.f2pRatio_max), int(pwidth * self.f2pRatio_max)),  flags=cv2.cv.CV_HAAR_SCALE_IMAGE)
         self.isRecognizedFace = len(faces) != 0
 
         if (self.isRecognizedFace):
-            print "face found!"
+            print "face found!" # debug to see if faces were recognized
             
             # iterate through faces
             for (x, y, w, h) in faces:
@@ -347,6 +354,7 @@ class FacialRec(Frame):
                 roi_gray = gray[y:y + h, x:x + w]
                 roi_color = img[y:y + h, x:x + w]
                 
+                ### algorithm to filter out false patterns detected
                 # find eyes
                 eyes = self.eye_cascade.detectMultiScale(roi_gray, minSize=(int(self.e2fRatio_min * w), int(self.e2fRatio_min * h)), maxSize=(int(self.e2fRatio_max * w), int(self.e2fRatio_max * h)))
                 # iterate through eyes
@@ -361,7 +369,7 @@ class FacialRec(Frame):
                 if len(mouths)>0:
                     mx, my, mw, mh=mouths[-1]
                     if my <= ey + eh:
-                        print "no mouths in hindsight"
+                        print "no mouths in hindsight" # the only mouths detected were not located on a face
                     else:
                         cv2.rectangle(roi_color, (mx, my), (mx + mw, my + mh), (0, 0, 255), 2)
                 else:
@@ -373,7 +381,7 @@ class FacialRec(Frame):
                 if len (smiles) >0:
                     sx,sy,sw,sh=smiles[-1]
                     if sy <= ey + eh:
-                        print "no smiles in hindsight"
+                        print "no smiles in hindsight" # the only smiles detected were not on a face
                     else:
                         # draw mouths on img
                         cv2.rectangle(roi_color,(sx,sy),(sx+sw,sy+sh),(255,255,0),2)
@@ -381,10 +389,9 @@ class FacialRec(Frame):
                     sx,sy,sw,sh=0,0,0,0
         	
         else:
-            print "no faces found :("
-        
-        # cv2.imwrite('facetest.png',img)
-        # Rearrang the color channel
+            print "no faces found :(" # debug to show no faces found
+       
+        # change bgr image to rgb
         b,g,r = cv2.split(img)
         img = cv2.merge((r,g,b))
 
@@ -392,8 +399,12 @@ class FacialRec(Frame):
         img = Image.fromarray(img)
         img = ImageTk.PhotoImage(image=img)
         print "facialRecognition ran"
+        
+        # put image with facial detection outlines on faceLbl
         self.faceLbl.config(image=img)
         self.imgtk = img
+        
+        # repeat process after 5 seconds
         self.after(5, self.facialRecognition)
 
 class FullscreenWindow:
@@ -444,7 +455,7 @@ class FullscreenWindow:
 class Manager():
     def __init__(self):
         self.w = FullscreenWindow()
-        self.sleepTimer = 60#000000000000000000000 #should be 60 by default
+        self.sleepTimer = 60
         self.countDown=self.sleepTimer
         self.counter = 0
         self.w.tk.after(1, self.Manage)
